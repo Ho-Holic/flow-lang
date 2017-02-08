@@ -1,7 +1,7 @@
 %YAML 1.2
 ---
 name: Flow
-file_extensions:: [flow]
+file_extensions: [flow]
 scope: source.flow
 
 contexts:
@@ -9,20 +9,38 @@ contexts:
     - include: global
 
   global:
+    - include: statements
+    - include: numbers
+    - include: string
     - include: require
     - include: comments
-    - include: statements
+    - include: types
 
   statements:  
-    - match: '\b(loop|branch|scope|yield|library|data|view|and|or|equal|not|xor)\b'
-      scope: keyword.control.c
+    - match: '\b(loop|branch|scope|yield|nothing|join|detach)\b'
+      scope: keyword.control.flow
+    - match: '\b(and|or|equal|not|xor)\b'  
+      scope: keyword.operator.word.flow
+
+  types:
+    - match: '\b(data|view|library)\b'
+      scope: storage.type.flow
+
+  numbers:
+    - match: '\b((0(x|X)\h*)|(([0-9]+\.?[0-9]*)|(\.[0-9]+))((e|E)(\+|-)?[0-9]+)?)\b'
+      scope: constant.numeric.flow
+
+  string:
+    - match: '".*"'
+      scope: string.quoted.double.flow
+
 
   require:
     - match: '\b(require)\b'
-      scope: keyword.control.import  
+      scope: keyword.control.import.flow  
 
   comments:    
     - match: '\#.*'
-      scope: comment.line    
+      scope: comment.line.flow    
     - match: '--.*'
-      scope: comment.line    
+      scope: comment.line.flow    

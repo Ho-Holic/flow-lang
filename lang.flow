@@ -16,19 +16,20 @@
 thread_id = 
   foo => 1 2 3
 
-join -> x
+join -> thread_id # or detach-> thread_id
 
 ----------------------------------------- Coroutine
 
-range a b =
+range a to:b =
   loop a < b and a > 0
     yield -> a
     a += 1
+  return -> ???    
 
-range a b = loop | a < b and a > 0 | yield -> a | a += 1
+range a to:b = loop | a < b and a > 0 | yield -> a | a += 1
 
 loop 
-  i = range -> 0 10
+  i = range -> 0 to 10
   print -> i
 
 loop   
@@ -67,7 +68,7 @@ require -> io from "C:/io.flow"
 
 ----------------------------------------- Variable
 
-x = 3
+x = 3 
 str = "cat"
 
 ----------------------------------------- Logical
@@ -125,7 +126,7 @@ scope calcForDouble
 
 x = ] 1 2 3 [ = ] 2 5 6 [ 
 
------------------------------------------ View
+----------------------------------------- View (typedef on steroids)
 
 data Point
      x
@@ -212,7 +213,7 @@ findIn x y source = ???
 
 findIn x y source= rewrite -> find x` y` in `source
 
-findIn 3 5 "/home/user/1.txt"  
+findIn 3 5 "/home/user/1.txt"
 
 find 3 5 in "/home/user/1.txt"
 
@@ -255,14 +256,20 @@ loop [i <-list]
 point -> x y # constructor function
   
 # void function call, how to deal with it?    
-spawnEvent _ = someEventSpawning -> x y z
-
-spawnEvent -> _
-spawnEvent -> void
-spawnEvent -> .
+spawnEvent nothing = someEventSpawning -> x y z # full definition
+spawnEvent _ = someEventSpawning -> x y z       # valid too
+spawnEvent = someEventSpawning -> x y z         # ok too
 
 
-isReady _ = data -> x y z
+view 1DPoint -> 2DPoint
+      x      -> x
+      y      -> x - y 
+
+
+spawnEvent -> nothing
+
+
+isReady nothing = data -> x y z
 
 # Operator '?' can treated as '->.'
 # but it can create abuse of spawnEvent? usage when function is not returning a boolean
@@ -283,6 +290,16 @@ res = x not equal y
 
 res = x === y
 res = x =/= y
+
+-----------------------------------------  Top/Bottom types
+
+#  any time can be a nothing so you can call foo -> 3 and value of 3 would be discarded
+# because this is void function
+
+foo nothing -> nothing
+
+? = nothing
+??? = nothing
 
 ----------------------------------------- Comments
 
