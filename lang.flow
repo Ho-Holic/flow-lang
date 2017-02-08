@@ -1,0 +1,316 @@
+
+########################################################
+# 
+# FLOW LANGUAGE SPEC v0.1
+#
+########################################################
+
+----------------------------------------- Flow
+
+-> function call
+
+=> start in a new thread
+
+----------------------------------------- Threads
+
+thread_id = 
+  foo => 1 2 3
+
+join -> x
+
+----------------------------------------- Coroutine
+
+range a b =
+  loop a < b and a > 0
+    yield -> a
+    a += 1
+
+range a b = loop | a < b and a > 0 | yield -> a | a += 1
+
+loop 
+  i = range -> 0 10
+  print -> i
+
+loop   
+  print -> | range -> 0 10 |
+
+loop   
+  print -> range -> 0 10
+
+----------------------------------------- Library
+
+library HashTable
+  take_hash obj = _ # use same function
+  data HashTable = HashTable_v2
+
+----------------------------------------- Import /Include
+
+require -> HashTable
+
+require -> HashTable from "https://www.github.com/blabla/hash.git"
+
+require libName from:path =
+  ???
+
+----------------------------------------- Multiarguments  
+
+# now you have N-args for 'path'
+
+require libName [from:path...] =
+  ???
+
+# usage
+
+require -> io from "C:/io.flow" 
+              from "www.github.com/blabla/io.git"
+  
+
+----------------------------------------- Variable
+
+x = 3
+str = "cat"
+
+----------------------------------------- Logical
+
+# ok to have '(' and ')' in math
+
+x = (true or false and true) xor false
+
+x = 3 * (5-2)
+
+----------------------------------------- Idempotent
+
+enum ColorChannel-> Red Green Blue
+
+idempotent ColorChannel -> Red # now red is basic 'default' value
+
+----------------------------------------- Branch (if/switch/pattern match)
+
+# vertical separator '|' used to write one-liners
+
+# one-liner 'if'
+
+foo -> branch | x < 3 | exit | relaunch
+
+branch | isCompleted | true -> exit -> 3 | false -> relaunch -> 5 # it is ok to have extra '|'
+
+branch isCompleted | true -> exit -> 3 | false -> relaunch -> 5
+
+
+# normal 'if'
+
+branch isCompleted
+  true -> exit -> 3     
+  false -> relaunch -> 5 
+
+# short hand normal if, first case is always important one
+
+branch isCompleted 
+  exit -> 3
+  relaunch -> 5
+
+branch type 
+  "Int"    -> calcForInt  
+  "Double" -> calcForDouble             
+
+scope calcForInt
+  ???
+
+scope calcForDouble
+  ???
+
+----------------------------------------- Array
+
+[1 2 3]
+
+x = ] 1 2 3 [ = ] 2 5 6 [ 
+
+----------------------------------------- View
+
+data Point
+     x
+     y
+
+view Size   -> Point
+     width  -> x
+     height -> y  
+
+----------------------------------------- Scope
+
+scope
+  print -> 6
+  print -> "I like cats"
+
+scope lock_mutex # named scope
+  do_stuff  
+
+x = scope do_stuff  # what this can be?
+  print -> 42
+  
+foo -> x  
+
+----------------------------------------- Loops
+
+processEvents x = branch x
+  window   -> event x y z
+  keyboard -> event key autoRepeat
+
+loop processEvents
+
+loop # good
+  ???
+
+loop x < 3 
+  ???
+
+--------------------------
+
+scope sendData
+  send -> to socket with data
+
+loop needMoreStep
+  sendData
+
+--------------------------
+        
+--------------------------
+
+loop [ x <- [1 2 3]]
+  ???
+
+loop [0, i < vec_size] # how make this work?
+  ???  
+  i += 1 # don't lie to programmer
+
+--------------------------
+
+----------------------------------------- Functions
+
+x y = x * y    # good
+
+x * y = x y
+
+x y -> x * y   # bad
+
+x * y <- x y   # bad
+
+= x * y
+
+----------------------------------------- Function Generation
+
+# normal notation
+set[Reset WrapAround Update]Modifier modifier = 
+  m[Reset WrapAround Update] = modifier
+
+# short notation (in development)
+set[Reset WrapAround Update]Modifier modifier -> 
+  m[...] = modifier 
+
+----------------------------------------- Function name-rewrite (or look at Function Tags)
+
+findIn x y source = ??? 
+
+findIn x y source= rewrite -> find x` y` in `source
+
+findIn 3 5 "/home/user/1.txt"  
+
+find 3 5 in "/home/user/1.txt"
+
+----------------------------------------- Function Tags
+
+
+find x y in:source = ???
+
+find ->
+  x:5 y:3 
+  in source:"/home/user/1.txt"
+
+find -> 5 3 in "/home/user/1.txt"
+
+find -> in "/home/user/1.txt" 5 3 # allow rearrangement without explicit x:5 y :3
+
+----------------------------------------- Function call
+
+# -> you don't need to wrap arguments into () 
+
+print -> n
+
+foo -> 
+  = x * x
+
+foo -> 
+  x * y =  x y
+
+foo ->
+  x = x * y 
+
+foo -> x = 1 
+       y = 255
+
+loop [i <-list]
+  print -> i # this is function call
+  set   -> i 
+           i+1      
+
+point -> x y # constructor function
+  
+# void function call, how to deal with it?    
+spawnEvent _ = someEventSpawning -> x y z
+
+spawnEvent -> _
+spawnEvent -> void
+spawnEvent -> .
+
+
+isReady _ = data -> x y z
+
+# Operator '?' can treated as '->.'
+# but it can create abuse of spawnEvent? usage when function is not returning a boolean
+
+foo -> branch | isReady? | a | b |
+
+----------------------------------------- Function defenition
+
+printPoint x y = print -> "(@x, @y)" # normal function
+           x y = print -> "(@x, @y)" # anonymous function
+               = print -> "(@_, @_)" # anonymous function (discard args)
+
+
+----------------------------------------- Logical operators
+
+res = x equal y
+res = x not equal y
+
+res = x === y
+res = x =/= y
+
+----------------------------------------- Comments
+
+# Single line comment. Why '#' ? It is good for drawing
+
+################################
+#                              #
+# Box is very nice and usefull #
+#                              #
+################################
+
+# No multiline comments
+
+# What about documentation comments?
+
+--
+    This is documentation comment
+    It is multiline and awesome?
+    No...
+--
+
+-- point.doc -- # also you can link doc to other file?
+
+# How can we use this as a chunk of binary data?
+-- 
+  <root>
+    <data> 123 </data>
+    <data> 456 </data>
+    <data> 789 </data>
+  </root>
+--

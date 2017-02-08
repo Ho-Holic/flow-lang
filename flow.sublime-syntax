@@ -1,0 +1,28 @@
+%YAML 1.2
+---
+name: Flow
+file_extensions:: [flow]
+scope: source.flow
+
+contexts:
+  main:
+    - include: global
+
+  global:
+    - include: require
+    - include: comments
+    - include: statements
+
+  statements:  
+    - match: '\b(loop|branch|scope|yield|library|data|view|and|or|equal|not|xor)\b'
+      scope: keyword.control.c
+
+  require:
+    - match: '\b(require)\b'
+      scope: keyword.control.import  
+
+  comments:    
+    - match: '\#.*'
+      scope: comment.line    
+    - match: '--.*'
+      scope: comment.line    
