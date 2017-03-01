@@ -17,7 +17,7 @@ contexts:
     - include: types
 
   statements:  
-    - match: '\b(loop|branch|scope|yield|nothing|join|detach)\b'
+    - match: '\b(loop|branch|scope|yield|nothing|join|detach|invariant|graph|seq|dict|idempotent|size|doc)\b'
       scope: keyword.control.flow
     - match: '\b(and|or|equal|not|xor)\b'  
       scope: keyword.operator.word.flow

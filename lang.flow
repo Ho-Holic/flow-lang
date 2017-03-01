@@ -65,6 +65,11 @@ require libName [from:path...] =
 require -> io from "C:/io.flow" 
               from "www.github.com/blabla/io.git"
   
+----------------------------------------- Invariant (static assert) 
+
+foo x ->
+  invariant x < 3
+  return -> x + 3
 
 ----------------------------------------- Variable
 
@@ -81,7 +86,10 @@ x = 3 * (5-2)
 
 ----------------------------------------- Idempotent
 
-enum ColorChannel-> Red Green Blue
+data ColorChannel 
+  Red 
+  Green 
+  Blue
 
 idempotent ColorChannel -> Red # now red is basic 'default' value
 
@@ -120,11 +128,72 @@ scope calcForInt
 scope calcForDouble
   ???
 
------------------------------------------ Array
+doc
 
-[1 2 3]
+  Different types of data
 
-x = ] 1 2 3 [ = ] 2 5 6 [ 
+  1 2 3        # 1. similar types  
+  1 "cat" true # 2. different types
+
+  Similar type can be handled by 'graph'
+  Different type can be handled by 'data'
+
+----------------------------------------- Graph (Seq, Tree)
+
+graph 1 2 3
+
+graph 1 = "cat" # directional
+      2 = "dog"
+      1 -> 2
+
+graph 1 <-> 2    # bi directional
+      7 <-> 12      
+
+graph 8 -> 3 # tree
+      3 -> 1
+      3 -> 6
+      6 -> 4
+      6 -> 7
+      8 -> 10
+      10 -> 14
+      14 -> 13
+
+#        8
+#      /   \
+#     3     10
+#    / \      \
+#   1   6     14
+#      / \    / 
+#     4  7   13
+
+----------------------------------------- Seq (array)
+
+# seq is graph with only nodes, no connections. Do we need syntactic sugar?
+
+seq 1 2 3
+
+seq "cat" "dog" "fish"
+
+seq "cat"
+    "dog"
+    "fish"
+
+x = seq 1 2 3    
+
+count = size x # count is 3
+
+
+----------------------------------------- Dict (Dictionary, Map, KeyValue)
+
+# dict is graph with node 'key' and attached 'value'. 
+# 1. it is not a tree
+# 2. it is not sorted or some kind of processed
+
+dict 1  = "cat"    
+     2  = "dog"
+
+dict "animal" = seq 1 2 3 
+     "car"    = seq 5 6 7    
 
 ----------------------------------------- View (typedef on steroids)
 
@@ -176,7 +245,7 @@ loop needMoreStep
         
 --------------------------
 
-loop [ x <- [1 2 3]]
+loop x in seq 1 2 3 
   ???
 
 loop [0, i < vec_size] # how make this work?
@@ -276,7 +345,7 @@ isReady nothing = data -> x y z
 
 foo -> branch | isReady? | a | b |
 
------------------------------------------ Function defenition
+----------------------------------------- Function definition
 
 printPoint x y = print -> "(@x, @y)" # normal function
            x y = print -> "(@x, @y)" # anonymous function
@@ -315,19 +384,41 @@ foo nothing -> nothing
 
 # What about documentation comments?
 
---
-    This is documentation comment
-    It is multiline and awesome?
-    No...
---
+-- Also one liner doc? Why not...
 
--- point.doc -- # also you can link doc to other file?
+----------------------------------------- Look it is awesome
 
-# How can we use this as a chunk of binary data?
--- 
-  <root>
-    <data> 123 </data>
-    <data> 456 </data>
-    <data> 789 </data>
-  </root>
---
+x = 3 
+
+----------------------------------------- Write code and split it
+
+doc
+
+  You can write some neat text here
+  A lot of text
+  Some function documentation and so on
+  You can place it in different file
+  It has more keywords to use, like:
+    arg x -> Argument @self of type integer # @self is 'x' in processed doc
+
+
+
+foo x -> x * x
+
+doc foo # this is function documentation
+  Fancy square function  
+  args x of type integer
+
+----------------------------------------- Use doc for big strings
+
+# use doc for big strings is bad idea!!!
+# need new keyword
+
+x = 3
+y = 7
+
+text = doc 
+  a lot of neat text here  
+  with some  x = @x, y = @y
+  this actually is multiline string
+
