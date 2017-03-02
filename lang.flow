@@ -11,12 +11,54 @@
 
 => start in a new thread
 
+----------------------------------------- Types
+
+# All types start from big letters
+
+# fast types I32, I64, I16, I32u, I8 or Integer32 is ok?
+
+# 1. No type annotation
+
+x = 3
+
+# 2. Separate type annotation
+
+x::Integer
+x = 3 
+
+# 3. Inline type annotation
+
+x = 3 :: Integer
+
+
+# function example
+
+foo x = x * x :: Integer -> Integer
+
+foo :: Integer -> Integer
+foo x = x * x 
+
+
+#foo . bar -> x # same as (foo(bar))(x) in C++
+
+foo -> bar -> x # same as foo(bar(x)) aka x' = bar(x); foo(x')
+
+---------------------------------------- Smart shadowing
+
+x = 3
+x = "3" :: shadow Integer 
+
+y = 1 + x       # 4
+str = "cat" + x # cat3
+
 ----------------------------------------- Threads
 
 thread_id = 
   foo => 1 2 3
 
-join -> thread_id # or detach-> thread_id
+join -> thread_id 
+# or you can
+detach-> thread_id
 
 ----------------------------------------- Coroutine
 
@@ -37,6 +79,14 @@ loop
 
 loop   
   print -> range -> 0 10
+
+
+# bind loop to a variable
+# lazy prevent auto execution of a loop
+
+x = lazy loop | print -> 15    
+
+x -> nothing
 
 ----------------------------------------- Library
 
@@ -68,8 +118,8 @@ require -> io from "C:/io.flow"
 ----------------------------------------- Invariant (static assert) 
 
 foo x ->
-  invariant x < 3
-  return -> x + 3
+  invariant (x < 3)
+  return -> (x + 3)
 
 ----------------------------------------- Variable
 
@@ -78,11 +128,11 @@ str = "cat"
 
 ----------------------------------------- Logical
 
-# ok to have '(' and ')' in math
+# ok to have '(' and ')' in math and they are forced
 
-x = (true or false and true) xor false
+x = ((true or false and true) xor false)
 
-x = 3 * (5-2)
+x = (3 * (5-2))
 
 ----------------------------------------- Idempotent
 
@@ -138,6 +188,13 @@ doc
   Similar type can be handled by 'graph'
   Different type can be handled by 'data'
 
+---------------------------------------- is operator
+
+# seems no sense in it, try to experiment with it
+
+branch is bidirectional? -> x
+  true -> makeData
+
 ----------------------------------------- Graph (Seq, Tree)
 
 graph 1 2 3
@@ -158,6 +215,11 @@ graph 8 -> 3 # tree
       10 -> 14
       14 -> 13
 
+graph 8 -> 3 10 # this also works
+      3 -> 1 6
+      6 -> 4 7
+      10 -> 14 -> 13      
+
 #        8
 #      /   \
 #     3     10
@@ -165,6 +227,21 @@ graph 8 -> 3 # tree
 #   1   6     14
 #      / \    / 
 #     4  7   13
+
+data RoadPoint
+  name
+  weight
+
+graph RoadPoint
+  p1 = "Тверская"   0.25 
+  p2 = "Пушкинская" 2.38
+  p1 -> p2
+
+# similar to call of   
+
+graph 
+  p1 = RoadPoint -> "Тверская"   0.25 
+  p2 = RoadPoint -> "Пушкинская" 2.38
 
 ----------------------------------------- Seq (array)
 
@@ -182,18 +259,26 @@ x = seq 1 2 3
 
 count = size x # count is 3
 
+----------------------------------------- How to define XML like structure?
 
------------------------------------------ Dict (Dictionary, Map, KeyValue)
+{
+  logSystem: {
+    enabled: true,
+    savePath: "/tmp/log.txt"
+  },
+  loader: {
+    type: automatic,
+    timeout: 4000
+  }
+}
 
-# dict is graph with node 'key' and attached 'value'. 
-# 1. it is not a tree
-# 2. it is not sorted or some kind of processed
-
-dict 1  = "cat"    
-     2  = "dog"
-
-dict "animal" = seq 1 2 3 
-     "car"    = seq 5 6 7    
+x = data root
+      data logSystem
+           enabled true
+           savePath "/tmp/log.txt"
+      data loader
+           type automatic
+           timeout 4000
 
 ----------------------------------------- View (typedef on steroids)
 
