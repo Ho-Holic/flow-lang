@@ -43,6 +43,12 @@ foo x = x * x
 
 foo -> bar -> x # same as foo(bar(x)) aka x' = bar(x); foo(x')
 
+---------------------------------------- const
+
+# const is not a type specifier
+
+const x = 3 :: Integer
+
 ---------------------------------------- Smart shadowing
 
 x = 3
