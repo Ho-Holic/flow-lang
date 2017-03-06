@@ -5,11 +5,21 @@
 #
 ########################################################
 
+----------------------------------------- Key concepts
+
+# 1. Write without symmetrics '{}', '[]', ()
+# 2. Write code without pressing 'back arrow'
+# 3. Maximum formatting support from compiler (don't compile bad code)
+# 4. Make code look pretty
+# 5. Avoid concept duplicates like 'for, while, do'. Most general idea to express all
+
 ----------------------------------------- Flow
 
--> function call
+->    function call
 
-=> start in a new thread
+=>    start in a new thread
+
+|     new line (with proper spacing or onliner mode?)
 
 ----------------------------------------- Types
 
@@ -47,7 +57,7 @@ foo -> bar -> x # same as foo(bar(x)) aka x' = bar(x); foo(x')
 
 # const is not a type specifier
 
-const x = 3 :: Integer
+readonly x = 3 :: Integer
 
 ---------------------------------------- Smart shadowing
 
@@ -55,7 +65,7 @@ x = 3
 x = "3" :: shadow Integer 
 
 y = 1 + x       # 4
-str = "cat" + x # cat3
+str = "cat" + x # cat3 
 
 ----------------------------------------- Threads
 
@@ -70,11 +80,11 @@ detach-> thread_id
 
 range a to:b =
   loop a < b and a > 0
-    yield -> a
+    branch yield a
     a += 1
   return -> ???    
 
-range a to:b = loop | a < b and a > 0 | yield -> a | a += 1
+range a to:b = loop | a < b and a > 0 | branch yield -> a | a += 1
 
 loop 
   i = range -> 0 to 10
@@ -142,10 +152,17 @@ x = (3 * (5-2))
 
 ----------------------------------------- Idempotent
 
-data ColorChannel 
-  Red 
-  Green 
-  Blue
+data ColorChannel red green blue :: Integer + Integer + Integer  # union?
+
+data Color
+  red   :: Integer  
+  green :: Integer
+  blue  :: Integer
+
+data Color red green blue :: Integer x Integer x Integer  
+
+data Color red green blue 
+Color :: Integer x Integer x Integer  
 
 idempotent ColorChannel -> Red # now red is basic 'default' value
 
@@ -155,7 +172,7 @@ idempotent ColorChannel -> Red # now red is basic 'default' value
 
 # one-liner 'if'
 
-foo -> branch | x < 3 | exit | relaunch
+foo -> branch | x < 3 | call -> exit | call -> relaunch
 
 branch | isCompleted | true -> exit -> 3 | false -> relaunch -> 5 # it is ok to have extra '|'
 
@@ -438,9 +455,9 @@ foo -> branch | isReady? | a | b |
 
 ----------------------------------------- Function definition
 
-printPoint x y = print -> "(@x, @y)" # normal function
-           x y = print -> "(@x, @y)" # anonymous function
-               = print -> "(@_, @_)" # anonymous function (discard args)
+printPoint x y = print -> "($x, $y)" # normal function
+           x y = print -> "($x, $y)" # anonymous function
+               = print -> "($_, $_)" # anonymous function (discard args)
 
 
 ----------------------------------------- Logical operators
@@ -450,6 +467,14 @@ res = x not equal y
 
 res = x === y
 res = x =/= y
+
+-----------------------------------------  Void Functions
+
+terminate nothing -> someCleverCode
+
+call x = x -> nothing # some alternative name? 
+
+call -> terminate # this is void function call wrapper
 
 -----------------------------------------  Top/Bottom types
 
@@ -512,4 +537,29 @@ text = doc
   a lot of neat text here  
   with some  x = @x, y = @y
   this actually is multiline string
+
+
+
+-----------------------------------------
+
+take x = foo-> x x + 1
+
+take x = 
+  foo-> x 
+        x + 1
+
+take x = | foo -> x 
+         |        x + 1 
+
+
+take x =
+| foo -> x 
+| |      x + 1         
+
+
+take x =
+| foo -> x 
+|      | x + 1         
+| bar -> x 
+|      | x + 2  
 
