@@ -17,11 +17,11 @@
 
 ->    function call
 
-=>    start in a new thread
+=>    function definition
 
 |     new line (with proper spacing or onliner mode?)
 
------------------------------------------ Types
+----------------------------------------- Type Annotation
 
 # All types start from big letters
 
@@ -43,10 +43,10 @@ x = 3 :: Integer
 
 # function example
 
-foo x = x * x :: Integer -> Integer
+foo x => x * x :: Integer -> Integer
 
 foo :: Integer -> Integer
-foo x = x * x 
+foo x => x * x 
 
 
 #foo . bar -> x # same as (foo(bar))(x) in C++
@@ -57,7 +57,7 @@ foo -> bar -> x # same as foo(bar(x)) aka x' = bar(x); foo(x')
 
 # const is not a type specifier
 
-readonly x = 3 :: Integer
+const x = 3 :: Integer
 
 ---------------------------------------- Smart shadowing
 
@@ -69,8 +69,8 @@ str = "cat" + x # cat3
 
 ----------------------------------------- Threads
 
-thread_id = 
-  foo => 1 2 3
+thread_id = thread -> 
+              foo x => 1 2 3
 
 join -> thread_id 
 # or you can
@@ -78,13 +78,13 @@ detach-> thread_id
 
 ----------------------------------------- Coroutine
 
-range a to:b =
+range a to:b =>
   loop a < b and a > 0
     branch yield a
     a += 1
   return -> ???    
 
-range a to:b = loop | a < b and a > 0 | branch yield -> a | a += 1
+range a to:b => loop | a < b and a > 0 | branch yield -> a | a += 1
 
 loop 
   i = range -> 0 to 10
@@ -104,11 +104,17 @@ x = lazy loop | print -> 15
 
 x -> nothing
 
+----------------------------------------- Testing
+
+test basic_case
+  sqrt -> 4 equal 2
+  sqrt -> 9 equal 3
+
 ----------------------------------------- Library
 
 library HashTable
-  take_hash obj = _ # use same function
-  data HashTable = HashTable_v2
+  take_hash obj equal _ # use same function
+  type HashTable equal HashTable_v2
 
 ----------------------------------------- Import /Include
 
@@ -116,14 +122,14 @@ require -> HashTable
 
 require -> HashTable from "https://www.github.com/blabla/hash.git"
 
-require libName from:path =
+require libName from:path =>
   ???
 
 ----------------------------------------- Multiarguments  
 
 # now you have N-args for 'path'
 
-require libName [from:path...] =
+require libName [from:path...] =>
   ???
 
 # usage
@@ -133,7 +139,7 @@ require -> io from "C:/io.flow"
   
 ----------------------------------------- Invariant (static assert) 
 
-foo x ->
+foo x =>
   invariant (x < 3)
   return -> (x + 3)
 
@@ -152,16 +158,16 @@ x = (3 * (5-2))
 
 ----------------------------------------- Idempotent
 
-data ColorChannel red green blue :: Integer + Integer + Integer  # union?
+type ColorChannel red green blue :: Integer + Integer + Integer  # union?
 
-data Color
+type Color
   red   :: Integer  
   green :: Integer
   blue  :: Integer
 
-data Color red green blue :: Integer x Integer x Integer  
+type Color red green blue :: Integer x Integer x Integer  
 
-data Color red green blue 
+type Color red green blue 
 Color :: Integer x Integer x Integer  
 
 idempotent ColorChannel -> Red # now red is basic 'default' value
@@ -187,11 +193,11 @@ branch isCompleted
 
 # short hand normal if, first case is always important one
 
-branch isCompleted 
+branch is completed 
   exit -> 3
   relaunch -> 5
 
-branch type 
+branch var_type 
   "Int"    -> calcForInt  
   "Double" -> calcForDouble             
 
@@ -209,9 +215,9 @@ doc
   1 "cat" true # 2. different types
 
   Similar type can be handled by 'graph'
-  Different type can be handled by 'data'
+  Different type can be handled by 'type'
 
----------------------------------------- is operator
+---------------------------------------- Is operator
 
 # seems no sense in it, try to experiment with it
 
@@ -251,7 +257,7 @@ graph 8 -> 3 10 # this also works
 #      / \    / 
 #     4  7   13
 
-data RoadPoint
+type RoadPoint
   name
   weight
 
@@ -290,28 +296,32 @@ count = size x # count is 3
     savePath: "/tmp/log.txt"
   },
   loader: {
-    type: automatic,
+    load_type: automatic,
     timeout: 4000
   }
 }
 
-x = data root
-      data logSystem
+x = type root
+      type logSystem
            enabled true
            savePath "/tmp/log.txt"
-      data loader
-           type automatic
+      type loader
+           switch_type automatic
            timeout 4000
 
 ----------------------------------------- View (typedef on steroids)
 
-data Point
+type Point
      x
      y
 
 view Size   -> Point
      width  -> x
      height -> y  
+
+view 1DPoint -> 2DPoint
+      x      -> x
+      y      -> x - y      
 
 ----------------------------------------- Scope
 
@@ -329,7 +339,7 @@ foo -> x
 
 ----------------------------------------- Loops
 
-processEvents x = branch x
+processEvents x => branch x
   window   -> event x y z
   keyboard -> event key autoRepeat
 
@@ -364,15 +374,14 @@ loop [0, i < vec_size] # how make this work?
 
 ----------------------------------------- Functions
 
-x y = x * y    # good
+x y => x * y    # good
 
-x * y = x y
+x * y <= x y    # reverse flow
 
-x y -> x * y   # bad
+forall list apply:f => ???
 
-x * y <- x y   # bad
-
-= x * y
+forall -> seq 1 2 3 
+          apply: x => x * x
 
 ----------------------------------------- Function Generation
 
@@ -384,28 +393,23 @@ set[Reset WrapAround Update]Modifier modifier =
 set[Reset WrapAround Update]Modifier modifier -> 
   m[...] = modifier 
 
------------------------------------------ Function name-rewrite (or look at Function Tags)
-
-findIn x y source = ??? 
-
-findIn x y source= rewrite -> find x` y` in `source
-
-findIn 3 5 "/home/user/1.txt"
-
-find 3 5 in "/home/user/1.txt"
-
 ----------------------------------------- Function Tags
 
+doc
+  By default for function 'find x y source'
+  compiler will generate 'find x:x y:y source:source' tags
+  and you can use them any time, even if you rename tag 'source' to 'in'
+  This also allows argument rearrangement
 
 find x y in:source = ???
 
 find ->
   x:5 y:3 
-  in source:"/home/user/1.txt"
+  in: "/home/user/1.txt"
 
-find -> 5 3 in "/home/user/1.txt"
+find -> 5 3 in: "/home/user/1.txt"
 
-find -> in "/home/user/1.txt" 5 3 # allow rearrangement without explicit x:5 y :3
+find -> in: "/home/user/1.txt" 5 3 # allow rearrangement without explicit x:5 y :3
 
 ----------------------------------------- Function call
 
@@ -414,18 +418,18 @@ find -> in "/home/user/1.txt" 5 3 # allow rearrangement without explicit x:5 y :
 print -> n
 
 foo -> 
-  = x * x
+  => x * x
 
 foo -> 
-  x * y =  x y
+  x * y => x y
 
 foo ->
-  x = x * y 
+  x => x * y 
 
-foo -> x = 1 
-       y = 255
+foo -> x => 1 
+       y => 255
 
-loop [i <-list]
+loop i <- list
   print -> i # this is function call
   set   -> i 
            i+1      
@@ -433,20 +437,14 @@ loop [i <-list]
 point -> x y # constructor function
   
 # void function call, how to deal with it?    
-spawnEvent nothing = someEventSpawning -> x y z # full definition
-spawnEvent _ = someEventSpawning -> x y z       # valid too
-spawnEvent = someEventSpawning -> x y z         # ok too
-
-
-view 1DPoint -> 2DPoint
-      x      -> x
-      y      -> x - y 
-
+spawnEvent nothing => someEventSpawning -> x y z   # full definition
+spawnEvent _       => someEventSpawning -> x y z   # valid too
+spawnEvent         => someEventSpawning -> x y z   # ok too
 
 spawnEvent -> nothing
 
 
-isReady nothing = data -> x y z
+isReady nothing => data -> x y z
 
 # Operator '?' can treated as '->.'
 # but it can create abuse of spawnEvent? usage when function is not returning a boolean
@@ -455,9 +453,9 @@ foo -> branch | isReady? | a | b |
 
 ----------------------------------------- Function definition
 
-printPoint x y = print -> "($x, $y)" # normal function
-           x y = print -> "($x, $y)" # anonymous function
-               = print -> "($_, $_)" # anonymous function (discard args)
+printPoint x y => print -> "($x, $y)" # normal function
+           x y => print -> "($x, $y)" # anonymous function
+               => print -> "($_, $_)" # anonymous function (discard args)
 
 
 ----------------------------------------- Logical operators
@@ -540,7 +538,7 @@ text = doc
 
 
 
------------------------------------------
+----------------------------------------- Fancy formatting
 
 take x = foo-> x x + 1
 
