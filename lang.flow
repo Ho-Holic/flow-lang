@@ -33,7 +33,7 @@ x = 3
 
 # 2. Separate type annotation
 
-x::Integer
+x :: Integer
 x = 3 
 
 # 3. Inline type annotation
@@ -107,14 +107,14 @@ x -> nothing
 ----------------------------------------- Testing
 
 test basic_case
-  sqrt -> 4 equal 2
-  sqrt -> 9 equal 3
+  equal 2 | sqrt -> 4 
+  equal 3 | sqrt -> 9
 
 ----------------------------------------- Library
 
 library HashTable
-  take_hash obj equal _ # use same function
-  type HashTable equal HashTable_v2
+  take_hash obj -> _ # search same name
+  view HashTable -> HashTable_v2
 
 ----------------------------------------- Import /Include
 
@@ -217,7 +217,7 @@ doc
   Similar type can be handled by 'graph'
   Different type can be handled by 'type'
 
----------------------------------------- Is operator
+----------------------------------------- Is operator
 
 # seems no sense in it, try to experiment with it
 
@@ -351,7 +351,7 @@ loop # good
 loop x < 3 
   ???
 
---------------------------
+-----------------------------------------
 
 scope sendData
   send -> to socket with data
@@ -359,9 +359,7 @@ scope sendData
 loop needMoreStep
   sendData
 
---------------------------
-        
---------------------------
+-----------------------------------------        
 
 loop x in seq 1 2 3 
   ???
@@ -370,18 +368,121 @@ loop [0, i < vec_size] # how make this work?
   ???  
   i += 1 # don't lie to programmer
 
---------------------------
 
------------------------------------------ Functions
+----------------------------------------- Function definition (one liner)
 
-x y => x * y    # good
+printPoint x y => print -> "($x, $y)" # normal function
+         _ x y => print -> "($x, $y)" # anonymous function
+             _ => print -> "($_, $_)" # anonymous function (discard args)
 
-x * y <= x y    # reverse flow
+
+----------------------------------------- Function definition (lambda)
+
+# seems that underscore lambda syntax is preferable
+
+exec -> _ x y => x + y
+
+exec -> \x y => x + y
+
+exec -> . x y => x + y
+
+exec -> x y => x + y
+
+find ->
+  _ x => x < 3
+  _ y => y > 0
+
+find ->
+  \ x => x < 3
+  \ y => y > 0
+
+find ->
+  . x => x < 3
+  . y => y > 0
+
+----------------------------------------- Function definition (clojure)
+
+global_flag = true
+k = 12
+
+# clojure by reference
+exec -> 
+  _ x y => branch | &global_flag | x + y | x - y * k 
+
+# clojure by value
+exec -> 
+  _ x y => branch | global_flag | x + y | x - y * k   
+
+----------
+
+global_flag = true
+
+# clojure by reference
+exec -> 
+  _ x y => branch | global_flag | x + y | x - y * k | with ref global_flag 
+                                                           ref k
+# clojure by reference
+exec -> 
+  _ x y => branch | global_flag | x + y | x - y * k 
+  with ref global_flag 
+       ref k
+
+# clojure by value
+exec -> 
+  _ x y => branch | global_flag | x + y | x - y * k      
+
+exec -> 
+  _ x y => branch | global_flag | x + y | x - y * k | with copy global_flag copy k     
+
+----------------------------------------- Function definition (discard args)
+
+# TODO: do we realy need discard?
+
+# no discard
+sum a b => a + b 
+
+# normal
+
+sum _ => _ + _ # TODO: bug here, looks like lambda, 'sum _' part
+
+# lambda syntax
+fold -> 
+  list
+  _ => _ + _
+
+fold -> list _ => _ + _
+
+----------------------------------------- Function definition (one liner)
+
+# normal function
+printPoint x y => 
+  print -> "($x, $y)" 
+
+# anonymous function
+x y => 
+  print -> "($x, $y)" 
+
+# anonymous function (discard args)                 
+=> print -> "($_, $_)" 
+
+----------------------------------------- Function definition (various)
+
+sum x y => x * y    # good
 
 forall list apply:f => ???
 
 forall -> seq 1 2 3 
           apply: x => x * x
+
+----------------------------------------- Function uniform call
+
+foo x y => x + y
+
+foo -> 3 5
+
+3 -> foo 5
+
+3 5 -> foo
 
 ----------------------------------------- Function Generation
 
@@ -420,14 +521,8 @@ print -> n
 foo -> 
   => x * x
 
-foo -> 
-  x * y => x y
-
 foo ->
   x => x * y 
-
-foo -> x => 1 
-       y => 255
 
 loop i <- list
   print -> i # this is function call
@@ -435,29 +530,9 @@ loop i <- list
            i+1      
 
 point -> x y # constructor function
+
+
   
-# void function call, how to deal with it?    
-spawnEvent nothing => someEventSpawning -> x y z   # full definition
-spawnEvent _       => someEventSpawning -> x y z   # valid too
-spawnEvent         => someEventSpawning -> x y z   # ok too
-
-spawnEvent -> nothing
-
-
-isReady nothing => data -> x y z
-
-# Operator '?' can treated as '->.'
-# but it can create abuse of spawnEvent? usage when function is not returning a boolean
-
-foo -> branch | isReady? | a | b |
-
------------------------------------------ Function definition
-
-printPoint x y => print -> "($x, $y)" # normal function
-           x y => print -> "($x, $y)" # anonymous function
-               => print -> "($_, $_)" # anonymous function (discard args)
-
-
 ----------------------------------------- Logical operators
 
 res = x equal y
@@ -537,25 +612,30 @@ text = doc
   this actually is multiline string
 
 
+----------------------------------------- Modern TODO
+
+note hack remove hardcoded port
+
+connect -> database address 1234
 
 ----------------------------------------- Fancy formatting
 
-take x = foo-> x x + 1
+take x => foo-> x x + 1
 
-take x = 
+take x => 
   foo-> x 
         x + 1
 
-take x = | foo -> x 
-         |        x + 1 
+take x => | foo -> x 
+          |        x + 1 
 
 
-take x =
+take x =>
 | foo -> x 
 | |      x + 1         
 
 
-take x =
+take x =>
 | foo -> x 
 |      | x + 1         
 | bar -> x 

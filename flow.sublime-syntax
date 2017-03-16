@@ -10,26 +10,31 @@ contexts:
 
   global:
     - include: statements
+    - include: require
     - include: numbers
     - include: string
-    - include: require
     - include: comments
-    - include: types
-    - include: typedefinition
+    - include: types    
 
   statements:  
-    - match: '\b(loop|branch|scope|yield|join|detach|invariant|graph|seq|idempotent|doc|const|lazy|test)\b'
+    - match: '\b(loop|branch|yield|join|detach|scope)\b'
       scope: keyword.control.flow
-    - match: '\b(and|or|equal|not|xor|true|false|nothing)\b'  
+    - match: '\b(and|or|equal|not|xor)\b'  
       scope: keyword.operator.word.flow
+    - match: '\b(const|lazy|shadow|ref|copy)\b'
+      scope: storage.modifier.flow    
+    - match: '\b(nothing|true|false)\b'
+      scope: constant.language.flow  
+
+  require:
+    - match: '\b(require|library|doc|test)\b'
+      scope: keyword.control.import.flow  
+    - match: '\b(note)\b(\s*\b(todo|hack|caution|fixme|consider|bug)\b)*'
+      scope: keyword.other.flow        
 
   types:
-    - match: '\b(type|view|library)\b'
-      scope: storage.type.flow
-
-  typedefinition:
-    - match: 'shadow'
-      scope: entity.name.enum.flow   
+    - match: '\b(type|view|graph|seq|invariant|idempotent|with)\b'
+      scope: storage.type.flow  
 
   numbers:
     - match: '\b((0(x|X)\h*)|(([0-9]+\.?[0-9]*)|(\.[0-9]+))((e|E)(\+|-)?[0-9]+)?)\b'
@@ -45,8 +50,3 @@ contexts:
     - match: '".*"'
       scope: string.quoted.double.flow
       
-
-
-  require:
-    - match: '\b(require)\b'
-      scope: keyword.control.import.flow  
